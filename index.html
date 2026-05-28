@@ -1,0 +1,152 @@
+<!doctype html>
+<html lang="zh-CN" data-theme="dark">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="柏林军礼生成器">
+    <title>柏林军礼生成器</title>
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ctext y='48' font-size='48'%3E%F0%9F%91%8B%3C/text%3E%3C/svg%3E">
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <main class="grid">
+      <header class="header">
+        <h1>柏林军礼生成器 <button id="themeToggle" class="icon-btn" type="button" title="切换主题" aria-label="切换主题">☾</button></h1>
+        <p>上传图片，拖动调整，添加普通军礼手势并导出动图。</p>
+      </header>
+
+      <section class="panel preview-panel">
+        <h2>预览</h2>
+        <div class="canvas-wrap">
+          <canvas id="canvas" class="canvas" width="112" height="112" tabindex="0" aria-label="动画预览画布"></canvas>
+          <div class="playback">
+            <button id="prev" class="btn" type="button" title="上一帧" aria-label="上一帧">◀</button>
+            <button id="play" class="btn" type="button" title="播放/暂停" aria-label="播放/暂停"><span id="playIcon">Ⅱ</span></button>
+            <button id="next" class="btn" type="button" title="下一帧" aria-label="下一帧">▶</button>
+          </div>
+        </div>
+
+        <div class="controls">
+          <label class="switch-row">
+            <span>调整模式</span>
+            <input id="toggleAdjust" type="checkbox">
+            <span class="switch" aria-hidden="true"></span>
+          </label>
+          <p class="hint">开启后可在预览里用鼠标、触摸或方向键移动图片。</p>
+
+          <label class="switch-row compact">
+            <span>水平翻转</span>
+            <input id="toggleFlip" type="checkbox">
+            <span class="switch" aria-hidden="true"></span>
+          </label>
+
+          <label class="select-row">
+            <span>军礼样式</span>
+            <select id="handStyle" class="control-select">
+              <option value="us">美式掌心向下</option>
+              <option value="british">英式掌心向外</option>
+              <option value="polish">波兰双指军礼</option>
+              <option value="french">欧式贴帽檐</option>
+              <option value="casual">自然弯臂军礼</option>
+            </select>
+          </label>
+
+          <label class="select-row">
+            <span>德式风格</span>
+            <select id="germanStyle" class="control-select">
+              <option value="poster">复古军装海报</option>
+              <option value="minimal">黑红金点缀</option>
+              <option value="off">关闭风格化</option>
+            </select>
+          </label>
+
+          <label class="range-row">
+            <span>风格强度</span>
+            <input id="styleIntensity" type="range" step="1" min="0" max="100" value="85">
+            <output id="styleIntensityOut">85</output>
+          </label>
+
+          <label class="range-row">
+            <span>军装透明</span>
+            <input id="uniformOpacity" type="range" step="1" min="0" max="100" value="62">
+            <output id="uniformOpacityOut">62</output>
+          </label>
+
+          <label class="range-row">
+            <span>帽子上下</span>
+            <input id="capOffsetY" type="range" step="1" min="-30" max="20" value="-8">
+            <output id="capOffsetYOut">-8</output>
+          </label>
+
+          <label class="range-row">
+            <span>军装上下</span>
+            <input id="uniformOffsetY" type="range" step="1" min="0" max="45" value="24">
+            <output id="uniformOffsetYOut">24</output>
+          </label>
+
+          <label class="range-row">
+            <span>大小</span>
+            <input id="scale" type="range" step="1" min="15" max="200" value="85">
+            <output id="scaleOut">85</output>
+          </label>
+
+          <label class="range-row">
+            <span>抖动</span>
+            <input id="squish" type="range" step="1" min="100" max="300" value="125">
+            <output id="squishOut">125</output>
+          </label>
+
+          <label class="range-row">
+            <span>速度</span>
+            <input id="fps" type="range" step="2" min="2" max="60" value="16">
+            <input id="fpsVal" class="number" type="number" step="1" min="2" max="60" value="16">
+          </label>
+
+          <div class="actions">
+            <button id="reset" class="btn secondary" type="button">重置</button>
+            <button id="export" class="btn primary" type="button">导出</button>
+          </div>
+        </div>
+      </section>
+
+      <section class="panel upload-panel">
+        <h2>上传</h2>
+        <label id="dropArea" class="drop-area" for="uploadFile">
+          <input id="uploadFile" type="file" accept="image/*">
+          <img id="uploadPreview" alt="上传图片预览">
+          <span class="upload-bar"><b>选择文件</b><span id="uploadFileName">或拖到这里</span></span>
+        </label>
+        <div class="url-row">
+          <input id="uploadUrl" type="url" placeholder="输入图片链接" aria-label="图片链接">
+          <button id="uploadUrlBtn" class="btn" type="button" title="上传链接图片" aria-label="上传链接图片">⇧</button>
+        </div>
+        <p id="uploadError" class="error" role="status"></p>
+        <p class="help">链接上传受目标站点限制，有些直链图片不能在浏览器里生成动图。</p>
+      </section>
+
+      <section class="panel output-panel">
+        <h2>输出</h2>
+        <figure class="result-box">
+          <img id="result" width="112" height="112" alt="导出的动图">
+          <figcaption id="info">...</figcaption>
+        </figure>
+        <div class="actions output-actions">
+          <a id="download" class="btn secondary disabled" href="#" download="berlin-salute.gif">下载</a>
+          <button id="copy" class="btn secondary" type="button">复制链接</button>
+        </div>
+        <p class="help">导出的链接只存在于你的浏览器里，分享前请下载动图文件。</p>
+      </section>
+
+      <footer class="footer">
+        <span>本地生成，无需上传到服务器。</span>
+        <span class="sep">|</span>
+        <button id="downloadSprite" class="link-btn" type="button">军礼素材</button>
+        <span class="sep">|</span>
+        <a href="https://github.com/jnordberg/gif.js" target="_blank" rel="noreferrer">动图生成库</a>
+      </footer>
+    </main>
+
+    <script src="vendor/gif.js"></script>
+    <script src="app.js"></script>
+  </body>
+</html>
